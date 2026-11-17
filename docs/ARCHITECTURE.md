@@ -38,7 +38,7 @@ The implementation migrations must define these tables and constraints:
 
 ### Migration sequence
 
-1. Verify target PostGIS availability. Create extension/schema and enum/check types only after that check; choose either PostGIS geography or the tested fallback deliberately.
+1. PostGIS has been verified in the EDAS Supabase Mumbai project as extension `postgis` version `3.3.7` in schema `extensions`. Use PostGIS geography and spatial indexing for the pilot migrations; confirm the migration role can access the extension and required functions when applying migrations.
 2. Create `hazards`, `evidence_objects`, and `hazard_observations` with FK/check constraints and uniqueness indexes.
 3. Create `hazard_challenges` and `hazard_status_events` with lifecycle constraints and indexes.
 4. Add report-ingestion and challenge-review RPCs, grants, and least-privilege policies. Revoke direct client writes to base tables.
@@ -59,17 +59,13 @@ Contract v2 proposes configurable MVP defaults: private `road-evidence` bucket; 
 
 ## 7. PostGIS verification status
 
-PostGIS is **not verified** in the target project. The repository has no Supabase project reference, connection URL, config, or migration and no authorized project connection was available. Supabase documentation describes PostGIS as an enableable extension, but this does not prove it is active in EDAS. Before migration, an authorized operator must run:
+PostGIS is **verified** in the target EDAS Supabase Mumbai project: extension `postgis`, version `3.3.7`, schema `extensions`, confirmed by direct SQL verification. Use `geography(Point,4326)`, `ST_DWithin`, and a GiST location index in the pilot schema. At migration time, confirm the migration role can resolve the extension's types and functions from `extensions` (including the configured search path or schema-qualified references), and verify the spatial query/index path in the disposable database. The repository does not store project credentials or connection details. If a future deployment target lacks PostGIS, use a tested Haversine candidate path with latitude/longitude indexes under the same transaction lock, and document the expected scale limitation.
 
-```sql
-SELECT extname, extversion FROM pg_extension WHERE extname = 'postgis';
-```
-
-Also confirm Dashboard → Database → Extensions lists it enabled, then verify `geography`, `ST_DWithin`, and GiST indexing with a disposable migration/query. If absent and permitted, enable it via `CREATE EXTENSION postgis SCHEMA extensions;`. If it cannot be enabled, use a tested Haversine candidate search with latitude/longitude indexes under the same transaction lock, and document the expected scale limitation. Do not silently assume extension availability.
+The reported direct SQL verification returned `postgis`, version `3.3.7`, schema `extensions`. Validate migration-role access and the geography/query/index path in a disposable migration before applying the schema to the pilot dataset. Do not silently assume extension availability on other deployment targets.
 
 ## 8. Integration dependencies and execution order
 
-1. Supply project reference/configuration securely; provision admin claim through trusted server-side control; verify PostGIS or explicitly select fallback.
+1. Supply project reference/configuration securely; provision admin claim through trusted server-side control; use the verified PostGIS 3.3.7 installation in schema `extensions` and validate migration-role access.
 2. Finalize configuration values (bucket name, upload limits/retention) from contract v2 defaults; create branch/worktree ownership plan.
 3. Agent 1 implements migrations, bucket policy, atomic RPC, JWT validation, API and storage integration. Agent 2 implements pure deterministic intelligence interface/tests. Agent 3 implements contract v2 client/UI. Agent 4 prepares/runs integration and E2E suites. Do not overlap ownership described in `AGENT_OWNERSHIP.md`.
 4. Integrate schema and domain interface, then backend transaction/auth/storage routes, then frontend.
@@ -77,4 +73,4 @@ Also confirm Dashboard → Database → Extensions lists it enabled, then verify
 
 ## 9. Remaining blockers and prototype assumptions
 
-Product-level API and challenge decisions are specified in contract v2. Before deployment, the operator still must provide the actual Supabase project reference/JWT verification config and credentials, verify PostGIS, provision trusted admins, configure Storage policies/cleanup, and choose whether to retain the stated MVP limits. Supabase currently documents its signed upload URL lifetime as two hours; a shorter TTL would require a verified proxy. Defaults are configurable and must not be presented as production guarantees. Rate/abuse defenses and privacy review are outside this prototype contract. No application code has been implemented and no agents have been launched.
+Product-level API and challenge decisions are specified in contract v2. Before deployment, the operator still must provide the actual Supabase project reference/JWT verification config and credentials, confirm migration-role access to verified PostGIS, provision trusted admins, configure Storage policies/cleanup, and choose whether to retain the stated MVP limits. Supabase currently documents its signed upload URL lifetime as two hours; a shorter TTL would require a verified proxy. Defaults are configurable and must not be presented as production guarantees. Rate/abuse defenses and privacy review are outside this prototype contract. No application code has been implemented and no agents have been launched.
