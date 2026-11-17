@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 from uuid import uuid4
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -13,6 +15,22 @@ from app.core.errors import ApiError, error_body
 
 
 app = FastAPI(title="EDAS API", version="2.0.0")
+cors_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "EDAS_CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174",
+    ).split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
+)
 app.include_router(router)
 app.include_router(vision_router)
 

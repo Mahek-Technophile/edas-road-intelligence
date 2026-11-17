@@ -40,6 +40,8 @@ backend\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
 
 Copy `backend/.env.example` to `backend/.env`, then load the values into the process environment using a local secret manager or shell. At minimum, configure the Supabase URL, server-only service-role key, and JWT verification settings required by [backend/README.md](backend/README.md). Do not put the service-role key in a frontend environment file.
 
+`EDAS_CORS_ORIGINS` defaults to local Vite development origins on ports 5173 and 5174. Set it to the exact frontend origin(s) used by your deployment; do not use `*` with authenticated API calls.
+
 Start FastAPI from the repository root:
 
 ```powershell
