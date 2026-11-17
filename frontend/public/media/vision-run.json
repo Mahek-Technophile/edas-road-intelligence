@@ -1,0 +1,28 @@
+{
+  "id": "RUN-021",
+  "title": "Road-damage survey · reference corridor",
+  "subtitle": "Sample before / after pair · 10 second survey",
+  "recorded_at": "2026-11-16T17:42:00+05:30",
+  "duration_ms": 10000,
+  "fps": 24,
+  "sample_fps": 10,
+  "frames_sampled": 100,
+  "input": "/media/sample-before.mp4",
+  "output": "/media/sample-after.mp4",
+  "poster": "/media/sample-before-poster.jpg",
+  "location": { "name": "Reference survey corridor" },
+  "model": {
+    "name": "yolov8s-road",
+    "runtime": "ONNX Runtime · CPU",
+    "input_size": 640,
+    "classes": ["pothole", "road_crack", "open_manhole", "waterlogging", "obstruction"]
+  },
+  "events": [
+    { "id": "EV-0201", "start_ms": 420, "end_ms": 2150, "timestamp_ms": 800, "label": "Pothole", "class_name": "D40", "category": "pothole", "confidence": 0.91, "severity": "high", "model": "yolov8s-road", "distance_m": 26 },
+    { "id": "EV-0202", "start_ms": 1850, "end_ms": 3500, "timestamp_ms": 2300, "label": "Pothole", "class_name": "D40", "category": "pothole", "confidence": 0.88, "severity": "high", "model": "yolov8s-road", "distance_m": 19 },
+    { "id": "EV-0203", "start_ms": 3350, "end_ms": 5350, "timestamp_ms": 4100, "label": "Road crack", "class_name": "D00", "category": "road_crack", "confidence": 0.84, "severity": "medium", "model": "yolov8s-road", "distance_m": 22 },
+    { "id": "EV-0204", "start_ms": 5400, "end_ms": 7250, "timestamp_ms": 6200, "label": "Pothole", "class_name": "D40", "category": "pothole", "confidence": 0.94, "severity": "critical", "model": "yolov8s-road", "distance_m": 16 },
+    { "id": "EV-0205", "start_ms": 7350, "end_ms": 8750, "timestamp_ms": 8000, "label": "Pothole", "class_name": "D40", "category": "pothole", "confidence": 0.90, "severity": "high", "model": "yolov8s-road", "distance_m": 20 },
+    { "id": "EV-0206", "start_ms": 8750, "end_ms": 9900, "timestamp_ms": 9300, "label": "Pothole", "class_name": "D40", "category": "pothole", "confidence": 0.96, "severity": "critical", "model": "yolov8s-road", "distance_m": 12 }
+  ]
+}

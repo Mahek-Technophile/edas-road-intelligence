@@ -4,6 +4,8 @@ EDAS is a road-intelligence platform for collecting, reviewing, and sharing road
 
 This repository contains the application implementation and its technical specifications. The documented target project has PostGIS 3.3.7 enabled in the `extensions` schema. Vision Lab code is present on `codex/edas-integration`; applying its migration or connecting to the live Supabase project is an operator action and is not performed by this repository setup guide.
 
+> **Presentation demo:** the frontend now opens in an offline pilot mode with a curated 30-hazard Pune dataset, a synchronized before/after Vision Lab, and a complete civic workflow. No Supabase account is required. Start with [docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md), which separates implemented functionality from prepared demo data. The backend and Vision notes below describe the separate technical deployment.
+
 ## Product areas
 
 | Area | What it does |
@@ -70,7 +72,9 @@ npm install
 npm run dev
 ```
 
-Set `VITE_EDAS_API_BASE` in `frontend/.env.local` to the backend base URL including `/api/v1`, for example `http://localhost:8000/api/v1`. Open the Vite URL printed by the command. Use **Connect to EDAS** to provide a valid user access token; the dashboard keeps it in the current tab's `sessionStorage`.
+The dashboard opens directly in pilot mode. It uses the seeded Pune dataset and keeps changes in `localStorage`; no token is needed for the demo.
+
+To attach the live API instead, set `VITE_EDAS_API_BASE` in `frontend/.env.local` to the backend base URL including `/api/v1`, for example `http://localhost:8000/api/v1`, and connect from **Settings**. The API token is held in memory for the session, not in local storage.
 
 ### Local model CLI
 
@@ -87,6 +91,8 @@ The current Torch import problem means the second command may exit with a runtim
 
 | Document | Purpose |
 |---|---|
+| [Demo guide](docs/DEMO_GUIDE.md) | Run the presentation pilot, follow the six-minute route, and see what is prepared vs implemented. |
+| [Presenter flow & Vercel](docs/PRESENTATION_FLOW_AND_DEPLOY.md) | Click-by-click demo narration, current frontend update, and static deployment steps. |
 | [User Guide](docs/USER_GUIDE.md) | Connect, navigate, report hazards, and use the Vision Lab. |
 | [Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md) | Components, processing lifecycle, security, configuration, operations, and failure modes. |
 | [Architecture](docs/ARCHITECTURE.md) | System boundaries, database design, spatial matching, and implementation/deployment status. |
