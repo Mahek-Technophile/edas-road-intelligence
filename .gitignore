@@ -10,11 +10,16 @@
 # Python
 __pycache__/
 *.py[cod]
+*.tsbuildinfo
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .venv/
 venv/
+
+# Vision model artifacts are fetched locally and never committed.
+backend/vision/models/**/*.pt
+backend/vision/models/**/*.onnx
 
 # Node
 node_modules/

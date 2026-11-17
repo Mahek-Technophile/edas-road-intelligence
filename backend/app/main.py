@@ -8,11 +8,13 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.routes import router
+from app.api.vision_routes import router as vision_router
 from app.core.errors import ApiError, error_body
 
 
 app = FastAPI(title="EDAS API", version="2.0.0")
 app.include_router(router)
+app.include_router(vision_router)
 
 
 @app.middleware("http")

@@ -17,3 +17,8 @@ file_size_limit = "10MiB"
 public = false
 file_size_limit = "10MiB"
 allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+
+[storage.buckets.vision-videos]
+public = false
+file_size_limit = "200MiB"
+allowed_mime_types = ["video/mp4"]

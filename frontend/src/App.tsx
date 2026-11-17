@@ -4,9 +4,11 @@ import { HazardDrawer, MapPanel } from './components/HazardDetails';
 import { HazardMap } from './components/HazardMap';
 import { ApiError, type AnalyticsSummary, type Hazard, type HazardDetail, type HazardType, type ReportResult, type Severity } from './types';
 import { HAZARD_TYPES, SEVERITIES, STATUSES } from './types';
+import VisionLab from './pages/VisionLab';
 
 const NAV = [
   { id: 'overview', label: 'Overview', icon: '▦' },
+  { id: 'vision', label: 'Vision Lab', icon: '◉' },
   { id: 'map', label: 'Hazard map', icon: '⌖' },
   { id: 'reports', label: 'Reports', icon: '▤' },
   { id: 'new', label: 'Report a hazard', icon: '+' },
@@ -93,7 +95,7 @@ function App() {
     <main className="main-area">
       <header className="topbar"><div className="breadcrumb"><span>EDAS</span><i>/</i><strong>{title}</strong></div><div className="top-actions"><span className="live-indicator"><i /> API data</span><button className="top-icon" onClick={() => void loadData()} aria-label="Refresh data">↻</button><button className="user-chip" onClick={() => setAuthOpen(true)}><span className="user-avatar">P</span><span>Pune Ops</span><span className="chevron">⌄</span></button></div></header>
       <div className="page-wrap">
-        <div className="page-heading"><div><span className="eyebrow">{today} <span className="heading-divider">·</span> PUNE, MAHARASHTRA</span><h1>{page === 'overview' ? 'Good morning, Pune team' : title}</h1><p>{page === 'overview' ? 'A clear view of the roads that need attention today.' : page === 'new' ? 'Share a road issue and help your community travel safer.' : page === 'map' ? 'Explore reported road hazards across the pilot area.' : 'Review and filter all reported road hazards.'}</p></div><div className="heading-actions"><button className="button button-outline" onClick={() => void loadData()} disabled={loading}><span className="refresh-mark">↻</span>{loading ? 'Refreshing' : 'Refresh'}</button><button className="button button-dark" onClick={() => setPage('new')}><span>＋</span> New report</button></div></div>
+        <div className="page-heading"><div><span className="eyebrow">{today} <span className="heading-divider">·</span> PUNE, MAHARASHTRA</span><h1>{page === 'overview' ? 'Good morning, Pune team' : title}</h1><p>{page === 'overview' ? 'A clear view of the roads that need attention today.' : page === 'new' ? 'Share a road issue and help your community travel safer.' : page === 'map' ? 'Explore reported road hazards across the pilot area.' : page === 'vision' ? 'Review road footage with model-backed detections.' : 'Review and filter all reported road hazards.'}</p></div><div className="heading-actions"><button className="button button-outline" onClick={() => void loadData()} disabled={loading}><span className="refresh-mark">↻</span>{loading ? 'Refreshing' : 'Refresh'}</button><button className="button button-dark" onClick={() => setPage('new')}><span>＋</span> New report</button></div></div>
         {error && <div className="banner-error" role="alert"><span>!</span><div><strong>We couldn’t complete that request.</strong><p>{error}</p></div><button onClick={() => setError('')} aria-label="Dismiss error">×</button></div>}
         {notice && <div className="banner-success" role="status"><span>✓</span><p>{notice}</p><button onClick={() => setNotice('')} aria-label="Dismiss message">×</button></div>}
 
@@ -101,6 +103,7 @@ function App() {
         {page === 'map' && <div className="page-card map-page-card"><FilterBar status={filterStatus} severity={filterSeverity} type={filterType} setStatus={setFilterStatus} setSeverity={setFilterSeverity} setType={setFilterType} total={hazards.length} /><MapPanel hazards={visibleHazards} onSelect={openDetail} />{hazards.length === 0 && <div className="map-empty">No hazards match these filters. Clear a filter or record a new hazard.</div>}</div>}
         {page === 'reports' && <Reports hazards={hazards} loading={loading} filterStatus={filterStatus} filterSeverity={filterSeverity} filterType={filterType} setStatus={setFilterStatus} setSeverity={setFilterSeverity} setType={setFilterType} onOpen={openDetail} />}
         {page === 'new' && <ReportForm token={token} onSuccess={(result) => { setNotice(reportMessage(result)); setPage('reports'); void loadData(true); if (result.hazard_id) void openDetail(result.hazard_id); }} onConnect={() => setAuthOpen(true)} />}
+        {page === 'vision' && <VisionLab token={token} onConnect={() => setAuthOpen(true)} onHazardReported={(message) => { setNotice(message); void loadData(true); }} />}
       </div>
       <footer className="page-footer"><span>EDAS · Enroute Driver Assistance System</span><span><span className="footer-dot" /> Pune pilot environment</span></footer>
     </main>
