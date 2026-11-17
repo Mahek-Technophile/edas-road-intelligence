@@ -1,0 +1,24 @@
+project_id = "edas-road-intelligence"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+major_version = 15
+
+[storage]
+enabled = true
+file_size_limit = "10MiB"
+
+[storage.buckets.road-evidence]
+public = false
+file_size_limit = "10MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+
+[storage.buckets.vision-videos]
+public = false
+file_size_limit = "200MiB"
+allowed_mime_types = ["video/mp4"]
