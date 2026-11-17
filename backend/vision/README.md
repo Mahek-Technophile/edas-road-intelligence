@@ -1,5 +1,7 @@
 # EDAS Vision pipeline
 
+For the complete product architecture and setup, see [EDAS Technical Documentation](../../docs/TECHNICAL_DOCUMENTATION.md), [Vision API](../../docs/VISION_API.md), and the [Vision Model Registry](../../docs/vision-models/README.md). This file records implementation-specific checkpoint and class-map details.
+
 The first configured capability is road-damage detection with the YOLOv8s
 RDD2022 seed-0 checkpoint. The checkpoint is downloaded locally to
 `backend/vision/models/pothole/road_damage_best.pt`; its artifact is ignored by

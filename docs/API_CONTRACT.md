@@ -2,6 +2,8 @@
 
 Contract version: 2 (MVP proposal; replaces the earlier illustrative contract). Base path: `/api/v1`. All JSON uses UTF-8. Timestamps are RFC 3339 UTC. Coordinates are WGS84 decimal degrees. UUIDs are lowercase canonical UUID strings.
 
+This document remains the contract for core hazard, evidence, challenge, status, and analytics routes. The implemented video-analysis surface is documented separately in [Vision API](VISION_API.md); its Vision job/event schema does not replace the core hazard contract. For a route index see [API overview](API.md).
+
 ## Prototype assumptions and security boundaries
 
 - Supabase Auth bearer access tokens are required for all endpoints except `GET /health`. Each reporter's stable ID is derived from validated JWT `sub`; clients cannot choose `reporter_id`. Synthetic demo vehicles are separate seeded test users, never a client-controlled production mode.

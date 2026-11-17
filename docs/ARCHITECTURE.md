@@ -2,9 +2,9 @@
 
 ## 1. Scope and repository assessment
 
-This plan is for the Pune pilot. It leaves `MASTER_SPEC.md` unchanged. `API_CONTRACT.md` is now version 2 with concrete endpoint schemas and explicit MVP assumptions.
+This architecture describes the EDAS Pune pilot. `MASTER_SPEC.md` remains the product-level source of truth. `API_CONTRACT.md` defines the v2 hazard/evidence/challenge API. `VISION_API.md` documents the additional asynchronous video-analysis endpoints.
 
-The repository remains a scaffold: top-level `backend/`, `frontend/`, `scripts/`, `supabase/migrations/`, `tests/{contract,e2e,integration}/`, and `docs/`. There are no application source files, migrations, dependency manifests, or test cases yet.
+The repository contains a React + TypeScript + Vite dashboard, a FastAPI application, deterministic road intelligence, Supabase migrations, and contract/test scaffolding. EDAS Vision Lab is implemented on `codex/edas-integration`; its migration has not been applied to the live Supabase project. See [Technical Documentation](TECHNICAL_DOCUMENTATION.md) for current implementation details and verified runtime limitations.
 
 ## 2. System architecture
 
@@ -18,9 +18,15 @@ FastAPI -> JWT/admin authorization -> service/domain layer
     +-> PostgreSQL transaction/RPC -> hazards, observations, challenges,
                                       evidence metadata, status audit
 Supabase private Storage bucket holds image binaries
+
+Vision Lab React page -> authenticated Vision API -> private MP4 bucket
+                                      |-> vision_jobs / RPC-backed queue
+                                      |-> separate CPU worker + OpenCV
+                                      |-> road-damage detector -> vision_detections
+                                      +-> progress/events via REST + SSE/polling
 ```
 
-The browser does not receive a service-role key and does not write directly to PostgreSQL. FastAPI derives reporter identity from validated JWT `sub`; client-supplied reporter IDs and roles are not trusted. Image bytes live only in private Supabase Storage. The API stores object metadata/path only. Detector absence returns `MODEL_NOT_CONFIGURED`; manual reporting is independent.
+The browser does not receive a service-role key and does not write directly to PostgreSQL. FastAPI derives reporter identity from validated JWT `sub`; client-supplied reporter IDs and roles are not trusted. Hazard-evidence images and Vision source videos live only in private Supabase Storage; the database stores object metadata/path, not binary content. Detector absence is reported explicitly; manual reporting is independent of model availability.
 
 ## 3. Final database schema
 
@@ -63,16 +69,16 @@ PostGIS is **verified** in the target EDAS Supabase Mumbai project: extension `p
 
 The reported direct SQL verification returned `postgis`, version `3.3.7`, schema `extensions`. Validate migration-role access and the geography/query/index path in a disposable migration before applying the schema to the pilot dataset. Do not silently assume extension availability on other deployment targets.
 
-## 8. Integration dependencies and execution order
+## 8. Integration and operations status
 
-1. Supply project reference/configuration securely; provision admin claim through trusted server-side control; use the verified PostGIS 3.3.7 installation in schema `extensions` and validate migration-role access.
-2. Finalize configuration values (bucket name, upload limits/retention) from contract v2 defaults; create branch/worktree ownership plan.
-3. Agent 1 implements migrations, bucket policy, atomic RPC, JWT validation, API and storage integration. Agent 2 implements pure deterministic intelligence interface/tests. Agent 3 implements contract v2 client/UI. Agent 4 prepares/runs integration and E2E suites. Do not overlap ownership described in `AGENT_OWNERSHIP.md`.
-4. Integrate schema and domain interface, then backend transaction/auth/storage routes, then frontend.
-5. Run concurrency, duplicate, challenge review, Storage, auth/audit, contract, frontend, and full end-to-end checks on integrated branch. Record actual commands and results.
+The core hazard architecture and contract v2 remain the source for report aggregation, evidence, status, challenges, and analytics. Vision Lab is an additional vertical slice with its own tables and API contract. It stores private source videos separately from hazard evidence and only creates a public hazard after a user submits a reviewed event through the core manual-report endpoint.
+
+The Vision worker uses PostgREST/RPC and Supabase Storage REST. It does not add Redis or use the backend's psycopg path. Database ownership and queue processing are separated by SQL functions granted only to `service_role`; user-facing RPCs include the validated token subject as an owner filter.
+
+Before deployment, apply `supabase/migrations/202611170002_vision_lab.sql` to a disposable authorized Supabase-compatible database, validate grants/RPCs/storage behavior and retention, then promote only through the project's reviewed migration procedure. Verify the existing PostGIS 3.3.7 geography functions/index path for the core hazard migrations. Run API/storage/concurrency tests only against disposable data. Never point test cleanup at the pilot dataset.
 
 ## 9. Remaining blockers and prototype assumptions
 
-Product-level API and challenge decisions are specified in contract v2. Before deployment, the operator still must provide the actual Supabase project reference/JWT verification config and credentials, confirm migration-role access to verified PostGIS, provision trusted admins, configure Storage policies/cleanup, and choose whether to retain the stated MVP limits. Supabase currently documents its signed upload URL lifetime as two hours; a shorter TTL would require a verified proxy. Defaults are configurable and must not be presented as production guarantees. Rate/abuse defenses and privacy review are outside this prototype contract.
+Product-level API and challenge decisions are specified in contract v2. Before deployment, the operator must configure Supabase project URL/JWT verification and server credentials securely; provision trusted admin claims; validate migration-role access to verified PostGIS; apply the reviewed core/Vision migrations to an authorized target; create/verify private Storage buckets and cleanup; and choose retention values. Signed URLs and configurable defaults are not production security guarantees. Rate/abuse defenses, video privacy/legal review, malware scanning, and backup lifecycle controls remain deployment responsibilities.
 
-Implementation status: EDAS Vision Lab is implemented on `codex/edas-integration` in commit `a7f70ee`. It adds the FastAPI upload/job/event API, a PostgREST/RPC-backed worker, private video storage, the React review interface, and the RDD2022 road-damage detector integration. The Supabase Vision migration has not been applied to the live project. On the current Windows/Python runtime, model prediction fails while importing `torch._dynamo.utils.NP_SUPPORTED_MODULES`; the API reports the detector unavailable and produces no detections. The Vision Lab does not present placeholder events as model output. The remaining deployment blockers above still apply.
+Implementation status: Vision Lab is present on `codex/edas-integration` (implementation commit `a7f70ee`, documentation status commit `b5cfedb`). Its API, worker, private storage integration, React review UI, and RDD2022 detector path are implemented and have local tests. The Vision migration is not applied to the live project. The current Windows/Python runtime fails model prediction while importing `torch._dynamo.utils.NP_SUPPORTED_MODULES`, so the capability reports failed/unavailable and emits no detection results. Do not claim measured inference speed or field accuracy. See [Vision model notes](vision-models/road-damage-rdd2022.md), [testing status](TESTING.md), and [known blockers](TECHNICAL_DOCUMENTATION.md#9-failure-handling-and-known-blockers).
